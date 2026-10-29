@@ -1,0 +1,25 @@
+name: A route that looks wrong
+description: The targets, the field or a route disagree with what you see in the picture
+labels: [reading]
+body:
+  - type: input
+    id: work
+    attributes:
+      label: The picture
+      description: Title and artist, or a link to a public-domain or openly licensed image.
+    validations:
+      required: true
+  - type: textarea
+    id: see
+    attributes:
+      label: What you see
+      description: Which masses belong together, or how the structure leads from one to the next, as you read it.
+    validations:
+      required: true
+  - type: textarea
+    id: tool
+    attributes:
+      label: What the tool says
+      description: The command you ran and the relevant output or drawing (`notan-route draw IMAGE -o out.png`).
+    validations:
+      required: true

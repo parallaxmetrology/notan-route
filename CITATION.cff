@@ -1,0 +1,21 @@
+cff-version: 1.2.0
+message: "If you use notan-route in research, please cite it as below."
+title: "notan-route: the order in which a picture's Notan masses lead from one to the next"
+type: software
+authors:
+  - family-names: Parrish
+    given-names: Russell
+    orcid: https://orcid.org/0009-0008-9781-7995
+version: "0.1.0"
+date-released: 2026-10-29
+license: MIT
+url: https://www.parallaxmetrology.com
+repository-code: https://github.com/parallaxmetrology/notan-route
+keywords: [notan, composition, painting, value structure, route, transition field, deterministic, image analysis]
+abstract: >
+  A deterministic route over the light and dark masses of a picture, built on the public
+  Notan mass (parallax-notan). From a start, each next mass is chosen by its strength, its
+  distance from the current one, and how much mass the straight path between them carries.
+  The main readout is the transition field: the route released from every mass, with the
+  basins its memoryless successor graph drains into. Ships known-answer scenes and the gates
+  the route was locked to, including a kill test against plain strongest-first ranking.
