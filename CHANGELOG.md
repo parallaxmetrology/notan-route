@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Browser demo, Drainage, in `docs/` for GitHub Pages: the transition field drawn as evenly spaced flow lines (anvaka/streamlines, MIT, vendored unchanged), with route-step replay, divide stability, what-if edits and side-by-side comparison. A JavaScript port of the Notan mass and the route, checked against the Python: identical targets, labels, basins, entry stability and routes on the four paintings (`docs/PARITY.json`). Python code unchanged.
+
 ## 0.1.0 (2026-10-29)
 
 First release. A rebuild, on the public Notan mass, of an idea from a private walk in the Image Structure Reader; none of that walk's code or calibrated inputs are used.

@@ -2,6 +2,8 @@
 
 The order in which a picture's structure leads from one mass to the next, read from its Notan.
 
+**[Try it in your browser: Drainage](https://parallaxmetrology.github.io/notan-route/)** draws the field as ink flow lines over four paintings or your own picture, read in the browser and never uploaded. Its JavaScript port matches this package's targets, basins and routes on all four paintings ([docs/README.md](docs/README.md)).
+
 ![Four paintings with their transition field and one route](docs/images/paintings.jpg)
 
 **Reading the figures.** Underneath is the picture's 3-value Notan: dark masses, flat ground (mid grey) and light masses, with thin lines where one target ends and the next begins. In the *transition field*, each target is tinted by the basin it drains into (one colour per basin, colour-blind safe), each arrow points from a target to the one it leads to next, and the larger ringed dots are where a basin ends: a pair that lead to each other, or a dead end. In the *route*, the red numbers are the stops in order, starting from the cross at the centre.

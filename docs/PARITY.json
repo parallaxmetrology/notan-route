@@ -1,0 +1,228 @@
+{
+ "date": "2026-10-29",
+ "node": "v24.13.1",
+ "report": {
+  "bruegel": {
+   "size": "1200x783 -> 512x334",
+   "size_equal": true,
+   "resized_rgb": {
+    "max_abs_diff": 0,
+    "exact": "513024/513024"
+   },
+   "mass_max_abs_diff": 4.440892098500626e-16,
+   "labels": "171008/171008",
+   "n_targets": [
+    13,
+    13
+   ],
+   "targets_equal": true,
+   "anchor_xy_max_diff": 0,
+   "basins_equal": true,
+   "entry_stability": [
+    0.5212,
+    0.5212
+   ],
+   "landing": "10624/10624",
+   "inside": "10624/10624",
+   "histories": {
+    "centre": {
+     "stops_equal": true,
+     "js_check": "4/4",
+     "steps": [
+      "10624/10624",
+      "10624/10624",
+      "10624/10624",
+      "10624/10624"
+     ]
+    },
+    "strongest": {
+     "stops_equal": true,
+     "js_check": "4/4",
+     "steps": [
+      "10624/10624",
+      "10624/10624",
+      "10624/10624",
+      "10624/10624"
+     ]
+    }
+   },
+   "seconds": {
+    "read": 0.92,
+    "field": 1.65
+   }
+  },
+  "caravaggio": {
+   "size": "1200x1134 -> 512x483",
+   "size_equal": true,
+   "resized_rgb": {
+    "max_abs_diff": 0,
+    "exact": "741888/741888"
+   },
+   "mass_max_abs_diff": 3.3306690738754696e-16,
+   "labels": "247296/247296",
+   "n_targets": [
+    23,
+    23
+   ],
+   "targets_equal": true,
+   "anchor_xy_max_diff": 0,
+   "basins_equal": true,
+   "entry_stability": [
+    0.5633,
+    0.5633
+   ],
+   "landing": "15488/15488",
+   "inside": "15488/15488",
+   "histories": {
+    "centre": {
+     "stops_equal": true,
+     "js_check": "6/6",
+     "steps": [
+      "15488/15488",
+      "15488/15488",
+      "15488/15488",
+      "15488/15488",
+      "15488/15488",
+      "15488/15488"
+     ]
+    },
+    "strongest": {
+     "stops_equal": true,
+     "js_check": "7/7",
+     "steps": [
+      "15488/15488",
+      "15488/15488",
+      "15488/15488",
+      "15488/15488",
+      "15488/15488",
+      "15488/15488",
+      "15488/15488"
+     ]
+    }
+   },
+   "seconds": {
+    "read": 1.09,
+    "field": 5.44
+   }
+  },
+  "gauguin": {
+   "size": "1200x958 -> 512x408",
+   "size_equal": true,
+   "resized_rgb": {
+    "max_abs_diff": 1.4901161193847656e-8,
+    "exact": "626687/626688"
+   },
+   "mass_max_abs_diff": 8.422734731894366e-12,
+   "labels": "208896/208896",
+   "n_targets": [
+    22,
+    22
+   ],
+   "targets_equal": true,
+   "anchor_xy_max_diff": 0,
+   "basins_equal": true,
+   "entry_stability": [
+    0.6728,
+    0.6728
+   ],
+   "landing": "13056/13056",
+   "inside": "13056/13056",
+   "histories": {
+    "centre": {
+     "stops_equal": true,
+     "js_check": "8/8",
+     "steps": [
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056"
+     ]
+    },
+    "strongest": {
+     "stops_equal": true,
+     "js_check": "7/7",
+     "steps": [
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056",
+      "13056/13056"
+     ]
+    }
+   },
+   "seconds": {
+    "read": 1.02,
+    "field": 4.3
+   }
+  },
+  "jeong": {
+   "size": "1200x697 -> 512x297",
+   "size_equal": true,
+   "resized_rgb": {
+    "max_abs_diff": 0,
+    "exact": "456192/456192"
+   },
+   "mass_max_abs_diff": 2.4980018054066022e-15,
+   "labels": "152064/152064",
+   "n_targets": [
+    22,
+    22
+   ],
+   "targets_equal": true,
+   "anchor_xy_max_diff": 0,
+   "basins_equal": true,
+   "entry_stability": [
+    0.7997,
+    0.7997
+   ],
+   "landing": "9472/9472",
+   "inside": "9472/9472",
+   "histories": {
+    "centre": {
+     "stops_equal": true,
+     "js_check": "11/11",
+     "steps": [
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472"
+     ]
+    },
+    "strongest": {
+     "stops_equal": true,
+     "js_check": "11/11",
+     "steps": [
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472",
+      "9472/9472"
+     ]
+    }
+   },
+   "seconds": {
+    "read": 0.9,
+    "field": 2.85
+   }
+  }
+ }
+}

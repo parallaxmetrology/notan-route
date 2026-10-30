@@ -1,0 +1,899 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Notan Drainage</title>
+<style>
+  :root {
+    --paper: #f3eee3; --ink: #1d1b18; --soft: #6e675c; --rule: #d8d0bf; --panel: #ebe4d6;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--paper); color: var(--ink);
+         font: 15px/1.45 Georgia, "Iowan Old Style", serif; }
+  header { padding: 18px 20px 6px; }
+  h1 { font-weight: normal; font-size: 26px; margin: 0; letter-spacing: .01em; }
+  header p { margin: 4px 0 0; color: var(--soft); max-width: 62em; }
+  main { display: grid; grid-template-columns: 270px 1fr; gap: 18px; padding: 12px 20px 30px; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; padding: 10px 16px; } }
+  aside { background: var(--panel); border: 1px solid var(--rule); padding: 14px; align-self: start;
+          font-size: 14px; }
+  aside h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .08em; color: var(--soft);
+             font-weight: normal; margin: 14px 0 6px; }
+  aside h2:first-child { margin-top: 0; }
+  .pick { display: flex; flex-wrap: wrap; gap: 6px; }
+  button, .seg label { font: inherit; font-size: 13px; background: var(--paper); color: var(--ink);
+           border: 1px solid #b9ae98; padding: 4px 9px; cursor: pointer; border-radius: 2px; }
+  button.on, .seg input:checked + span { background: var(--ink); color: var(--paper); }
+  .seg { display: flex; flex-wrap: wrap; gap: 0; }
+  .seg label { padding: 0; border-radius: 0; margin-right: -1px; }
+  .seg label span { display: block; padding: 4px 9px; }
+  .seg input { display: none; }
+  input[type=range] { width: 100%; accent-color: var(--ink); }
+  .row { display: flex; justify-content: space-between; color: var(--soft); font-size: 13px; }
+  .stage { position: relative; min-width: 0; }
+  canvas { display: block; width: 100%; height: auto; background: #fff; box-shadow: 0 1px 0 var(--rule); }
+  #hover { min-height: 2.9em; color: var(--soft); font-size: 13px; margin-top: 8px; }
+  #receipt { font: 12px/1.5 ui-monospace, Menlo, monospace; color: var(--soft); white-space: pre-wrap; }
+  .note { font-size: 13px; color: var(--soft); }
+  .legend span { display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; }
+  details { margin-top: 18px; max-width: 62em; }
+  .drop { display: block; margin-top: 10px; padding: 10px; border: 1px dashed #a89c84; font-size: 13px;
+          color: var(--soft); cursor: pointer; background: var(--paper); }
+  .drop.over, .stage.over canvas { outline: 2px solid var(--ink); }
+  #status { margin-top: 6px; min-height: 1.2em; }
+  summary { cursor: pointer; }
+  .pair { display: grid; gap: 14px; }
+  .pair.two { grid-template-columns: 1fr 1fr; }
+  @media (max-width: 1000px) { .pair.two { grid-template-columns: 1fr; } }
+  figure { margin: 0; min-width: 0; }
+  figcaption { font-size: 13px; color: var(--soft); margin-bottom: 4px; }
+  figcaption:empty { display: none; }
+  button.ver { display: block; width: 100%; text-align: left; }
+  select { font: inherit; font-size: 13px; max-width: 100%; background: var(--paper); border: 1px solid #b9ae98; }
+  #cmpOut { margin-top: 12px; padding: 12px 16px; background: var(--panel); border: 1px solid var(--rule);
+            font-size: 14px; max-width: 62em; }
+  #cmpOut h3 { font-weight: normal; font-size: 17px; margin: 0 0 6px; }
+  #cmpOut p { margin: 6px 0; } #cmpOut ul { margin: 2px 0 8px; padding-left: 20px; }
+  #cv { cursor: crosshair; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Notan Drainage</h1>
+  <p>Where a picture's masses lead, drawn as flow lines. Each line follows notan-route's own rule: from
+     any point, head for the mass the route would take first. Lines drain into the masses; with
+     <em>onward</em> on, they carry through each mass to the next until they reach a basin's end.</p>
+</header>
+<main>
+  <aside>
+    <h2>Picture</h2>
+    <div class="pick" id="pick"></div>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept="image/*" hidden>
+      <strong>Your picture</strong>: choose or drop one here. It is read in this browser and never leaves it.
+    </label>
+    <div class="note" id="status"></div>
+
+    <h2>Lines</h2>
+    <div class="seg" id="mode">
+      <label><input type="radio" name="mode" value="landing" checked><span>landing</span></label>
+      <label><input type="radio" name="mode" value="onward"><span>onward</span></label>
+    </div>
+    <p class="note" id="modeNote"></p>
+
+    <h2>Route so far</h2>
+    <div class="seg" id="hist">
+      <label><input type="radio" name="hist" value="centre" checked><span>from centre</span></label>
+      <label><input type="radio" name="hist" value="strongest"><span>from strongest</span></label>
+    </div>
+    <input type="range" id="step" min="0" max="1" step="1" value="0">
+    <div class="row"><span>no stops</span><span id="stepv">step 0</span><span id="stepmax"></span></div>
+    <div class="pick"><button id="prev">&lsaquo; step</button><button id="play">play</button><button id="next">step &rsaquo;</button></div>
+    <p class="note" id="stepNote"></p>
+
+    <h2>Under the lines</h2>
+    <div class="seg" id="under">
+      <label><input type="radio" name="under" value="notan" checked><span>Notan</span></label>
+      <label><input type="radio" name="under" value="image"><span>picture</span></label>
+      <label><input type="radio" name="under" value="paper"><span>paper</span></label>
+    </div>
+
+    <h2>Ink</h2>
+    <div class="seg" id="ink">
+      <label><input type="radio" name="ink" value="basin" checked><span>by basin</span></label>
+      <label><input type="radio" name="ink" value="black"><span>black</span></label>
+    </div>
+
+    <h2>Spacing</h2>
+    <input type="range" id="sep" min="3" max="16" step="1" value="6">
+    <div class="row"><span>dense</span><span id="sepv">6 px</span><span>open</span></div>
+
+    <h2>Marks</h2>
+    <label><input type="checkbox" id="marks" checked> masses and basin ends</label>
+
+    <h2>Divides</h2>
+    <p class="note">Where a step either side leads to a different first stop. Test whether each piece
+      survives notan-route's five small changes to the picture.</p>
+    <div class="pick"><button id="stabGo">test the divides</button>
+      <label class="note"><input type="checkbox" id="stabShow" checked> show</label></div>
+    <div class="seg" id="tol" style="margin-top:6px">
+      <label><input type="radio" name="tol" value="0.01"><span>within 0.01</span></label>
+      <label><input type="radio" name="tol" value="0.02" checked><span>0.02</span></label>
+      <label><input type="radio" name="tol" value="0.05"><span>0.05</span></label>
+    </div>
+    <div class="note" id="stabStatus"></div>
+    <div class="note" id="stabKey" hidden>
+      <svg width="34" height="8"><line x1="1" y1="4" x2="33" y2="4" stroke="#1d1b18" stroke-width="3"/></svg> kept by all five changes<br>
+      <svg width="34" height="8"><line x1="1" y1="4" x2="33" y2="4" stroke="#1d1b18" stroke-width="1.6" stroke-dasharray="5 3"/></svg> kept by three or four<br>
+      <svg width="34" height="8"><line x1="1" y1="4" x2="33" y2="4" stroke="#1d1b18" stroke-width="1.2" stroke-dasharray="1 3"/></svg> kept by two or fewer
+    </div>
+    <div id="stabOut" style="font: 12px/1.5 ui-monospace, Menlo, monospace; color: var(--soft); white-space: pre-wrap"></div>
+    <h2>What if</h2>
+    <p class="note">Click a mass on the picture to choose it, then try a change. The picture's own pixels
+      are changed and read again; the result opens next to the original.</p>
+    <div class="note" id="wiSel"></div>
+    <div class="seg" id="wiOp" style="margin-top:6px">
+      <label><input type="radio" name="wiOp" value="lighter" checked><span>lighter</span></label>
+      <label><input type="radio" name="wiOp" value="darker"><span>darker</span></label>
+      <label><input type="radio" name="wiOp" value="paint out"><span>paint out</span></label>
+    </div>
+    <div id="wiAmtRow">
+      <input type="range" id="wiAmt" min="10" max="80" step="5" value="30">
+      <div class="row"><span>a little</span><span id="wiAmtv">30%</span><span>a lot</span></div>
+    </div>
+    <div class="pick"><button id="wiGo" disabled>try it</button></div>
+    <div class="note" id="wiStatus"></div>
+
+    <h2>Compare</h2>
+    <p class="note">Put another version beside this one: an edit, or a second picture you drop in
+      (another state of the painting, another thumbnail).</p>
+    <label class="note">beside it: <select id="cmpSel"></select></label><br>
+    <label class="note"><input type="checkbox" id="cmpShow" checked> mark what moved</label>
+    <div class="note" id="cmpKey" hidden>
+      <svg width="34" height="10"><rect x="1" y="1" width="32" height="8" fill="rgba(179,38,30,0.22)"/></svg> first stop changed (on B)<br>
+      <svg width="34" height="8"><line x1="1" y1="4" x2="33" y2="4" stroke="#b3261e" stroke-width="2.4"/></svg> new divide (on B)<br>
+      <svg width="34" height="8"><line x1="1" y1="4" x2="33" y2="4" stroke="#b3261e" stroke-width="1.8" stroke-dasharray="4 3"/></svg> divide B no longer has (on A)
+    </div>
+
+    <h2>Keep</h2>
+    <div class="pick">
+      <button id="png">PNG</button><button id="svg">SVG (plotter)</button>
+    </div>
+
+    <h2>Readout</h2>
+    <div class="legend" id="legend"></div>
+    <div id="receipt"></div>
+  </aside>
+  <div class="stage">
+    <div class="pair" id="pair">
+      <figure><figcaption id="capA"></figcaption><canvas id="cv"></canvas></figure>
+      <figure id="figB" hidden><figcaption id="capB"></figcaption><canvas id="cv2"></canvas></figure>
+    </div>
+    <div id="hover">Point at the picture to see where the route goes first from there. Click a mass to choose it.</div>
+    <div id="cmpOut" hidden></div>
+    <details>
+      <summary>How it is made</summary>
+      <p>The field comes from <a href="https://github.com/parallaxmetrology/notan-route">notan-route</a>,
+      unchanged. <code>tools/export.py</code> reads the picture, then for every 4-pixel cell asks the
+      library for the first stop of a route started there (strength &times; proximity &times; connection,
+      no history). A fixed spread of 40 cells is re-checked against the public <code>route()</code> call;
+      the receipt shows how many agree. Inside a mass, <em>onward</em> points to that mass's successor
+      (the field's memoryless next step), so lines run on to the basin ends.</p>
+      <p><em>Route so far</em> replays a route (from the centre, or from the strongest mass). At step
+      <em>k</em> its first <em>k</em> stops are taken and damp their neighbourhood exactly as in
+      notan-route's walk; every line then heads for the route's next pick from where it stands, and no
+      line is drawn where the route would end (best score under the floor). Receipt: the same rule,
+      evaluated at each stop's own position, must give the route's actual next stop.</p>
+      <p>A picture you drop in is read by a JavaScript port of parallax-notan and notan-route
+      (<code>js/notan-route.js</code>), in a worker, in this browser. On the four paintings here it gives the
+      same masses, basins, routes and grid cells as the Python, cell for cell (README: Parity).</p>
+      <p><em>Divides</em>: a divide is the boundary between two side-by-side cells whose first stops
+      differ. The picture is re-read after each of notan-route's five changes (2% crop on every side,
+      JPEG quality 60, gamma 0.8 and 1.25, every second pixel); a piece of divide is kept by a change
+      when the changed reading has a divide within the chosen distance (0.01, 0.02 or 0.05 of the frame's
+      long side; one grid cell is about 0.008). Crop readings are
+      mapped back to the full frame. The JPEG uses this browser's encoder, not Pillow's, so that one
+      change can differ from the Python; the other four match it exactly. A kept divide is a divide
+      in the same place: the masses either side may be different ones.</p>
+      <p><em>What if</em> changes the picture's own pixels inside the chosen mass, as the reader cut it
+      (its region at the 512 px working size, edge softened by a Gaussian of 1.5 working pixels), and
+      reads the changed picture from the start. <em>Lighter</em> moves each pixel the chosen share of the
+      way to white, <em>darker</em> the chosen share of the way to black, <em>paint out</em> replaces the
+      mass with the mean colour of a ring just outside it. It is a stand-in for repainting, not a model
+      of paint: a change made with a brush will differ.</p>
+      <p><em>Compare</em> matches masses between the two readings (same polarity, nearest first, within
+      0.05 of the frame's long side, one to one). A cell's first stop has changed when B's first stop
+      there is not the match of A's. A basin holds when B has a basin ending within 0.05 of the same
+      place, as in notan-route's stability check. A piece of divide is kept when the other reading has
+      a divide within 0.02.</p>
+      <p>The lines are drawn by <a href="https://github.com/anvaka/streamlines">anvaka/streamlines</a>
+      (MIT, vendored unchanged), an implementation of Jobard and Lefer's evenly spaced streamlines.
+      Its default first seed is random; here every drawing is seeded from a fixed lattice, so the same
+      settings give the same lines. Line weight grows along each line towards where it drains.</p>
+      <p>The lines are a picture of notan-route's rule, not a claim about eyes or viewing order.
+      Where lines from two directions meet head on, the picture is a divide: a step either side
+      leads to a different mass.</p>
+    </details>
+  </div>
+</main>
+
+<script type="module">
+import computeStreamlines from './vendor/streamlines/index.js';
+import { compare } from './js/compare.js';
+
+const BASIN = ['#e69f00', '#56b4e9', '#009e73', '#d55e00', '#cc79a7', '#0072b2', '#f0e442', '#787878'];
+const RED = '#b3261e';
+const SCALE = 2;
+const MAX_EDITS = 8;
+const $ = (id) => document.getElementById(id);
+const val = (name) => document.querySelector(`input[name=${name}]:checked`).value;
+const store = { get(k) { try { return localStorage.getItem('nd.' + k); } catch { return null; } },
+                set(k, v) { try { localStorage.setItem('nd.' + k, v); } catch {} } };
+const pct = (x) => `${Math.round(100 * x)}%`;
+const nOf = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+
+// Every reading on the page is a version: a painting, a picture you dropped in, or an edit.
+const versions = new Map();
+const state = { cur: null, cmp: null, sel: null, stab: {}, cmpCache: new Map(), nOwn: 0, nEdit: 0 };
+const V = { a: { cv: $('cv'), lines: [], job: null }, b: { cv: $('cv2'), lines: [], job: null } };
+for (const v of Object.values(V)) v.ctx = v.cv.getContext('2d');
+const keyOf = (v) => (v === V.a ? state.cur : state.cmp);
+const verOf = (v) => versions.get(keyOf(v));
+const comparing = () => !!(state.cmp && state.cmp !== state.cur && versions.get(state.cmp)?.d);
+const views = () => (comparing() ? [V.a, V.b] : [V.a]);
+const dA = () => versions.get(state.cur).d;
+
+function addVersion(v) {
+  versions.set(v.key, v);
+  const b = document.createElement('button');
+  b.textContent = v.button || v.label;
+  b.title = v.label;
+  b.dataset.name = v.key;
+  if (v.parent) b.className = 'ver';
+  b.onclick = () => open(v.key);
+  $('pick').appendChild(b);
+  v.btn = b;
+  if (v.d) prepare(v.d);
+  // keep memory in bounds: drop the oldest edit that is not on screen
+  const edits = [...versions.values()].filter((x) => x.parent);
+  if (edits.length > MAX_EDITS) {
+    const old = edits.find((x) => x.key !== state.cur && x.key !== state.cmp && x.key !== v.key);
+    if (old) { versions.delete(old.key); old.btn.remove(); delete state.stab[old.key]; }
+  }
+  cmpOptions();
+}
+
+function prepare(d) {
+  const [w, h] = d.work_px;
+  d.px = d.targets.map(t => ({ x: t.x * d.span + (w - 1) / 2, y: t.y * d.span + (h - 1) / 2 }));
+}
+
+const names = await (await fetch('data/index.json')).json();
+for (const n of names) addVersion({ key: n, label: n[0].toUpperCase() + n.slice(1), painting: n });
+
+function img(src) {
+  return new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+}
+
+async function ensureData(v) {
+  if (v.d) return;
+  const d = await (await fetch(`data/${v.painting}.json`)).json();
+  const [notan, image] = await Promise.all([img(`data/${v.painting}_notan.png`), img(`data/${v.painting}_image.jpg`)]);
+  prepare(d); v.d = d; v.imgs = { notan, image };
+}
+
+async function open(key) {
+  const v = versions.get(key);
+  await ensureData(v);
+  if (v.painting) store.set('pic', key);
+  if (state.cmp === key) state.cmp = state.cur !== key ? state.cur : null;
+  state.cur = key; state.sel = null;
+  show();
+}
+
+function show() {
+  for (const v of versions.values()) v.btn.classList.toggle('on', v.key === state.cur);
+  const two = comparing();
+  $('pair').classList.toggle('two', two);
+  $('figB').hidden = !two;
+  $('cmpKey').hidden = !two;
+  $('capA').textContent = two ? 'A: ' + versions.get(state.cur).label : '';
+  $('capB').textContent = two ? 'B: ' + versions.get(state.cmp).label : '';
+  for (const v of views()) { const [w, h] = verOf(v).d.work_px; v.cv.width = w * SCALE; v.cv.height = h * SCALE; }
+  if (!two && V.b.job) { V.b.job.dispose(); V.b.job = null; }
+  stopPlay(); $('step').value = 0;
+  cmpOptions(); whatifText(); compareText(); readout();
+  draw();
+}
+
+// ---- route so far ----
+$('hist').addEventListener('change', () => { setStep(0); });
+$('step').addEventListener('input', () => { stopPlay(); draw(); });
+$('prev').onclick = () => { stopPlay(); setStep(stepNow() - 1); };
+$('next').onclick = () => { stopPlay(); setStep(stepNow() + 1); };
+$('play').onclick = () => {
+  if (state.playing) return stopPlay();
+  const h = history(dA()); if (!h) return;
+  state.playing = true; $('play').textContent = 'stop'; $('play').classList.add('on');
+  if (stepNow() >= h.stops.length) setStep(0);
+  const tick = () => {
+    if (!state.playing) return;
+    if (V.a.drawing || V.b.drawing) { state.timer = setTimeout(tick, 200); return; }
+    if (stepNow() >= history(dA()).stops.length) return stopPlay();
+    state.timer = setTimeout(() => { if (state.playing) { setStep(stepNow() + 1); tick(); } }, 1400);
+  };
+  tick();
+};
+function stopPlay() { state.playing = false; clearTimeout(state.timer); $('play').textContent = 'play'; $('play').classList.remove('on'); }
+function setStep(s) {
+  const h = history(dA()); const max = h ? h.stops.length : 0;
+  $('step').value = Math.max(0, Math.min(max, s)); draw();
+}
+for (const id of ['mode', 'under', 'ink']) $(id).addEventListener('change', () => { store.set(id, val(id)); draw(); });
+$('sep').addEventListener('input', () => { $('sepv').textContent = $('sep').value + ' px'; });
+$('sep').addEventListener('change', () => { store.set('sep', $('sep').value); draw(); });
+$('marks').addEventListener('change', () => paintAll());
+for (const id of ['mode', 'under', 'ink']) {
+  const v = store.get(id); const el = v && document.querySelector(`input[name=${id}][value=${v}]`);
+  if (el) el.checked = true;
+}
+if (store.get('sep')) { $('sep').value = store.get('sep'); $('sepv').textContent = $('sep').value + ' px'; }
+
+function cellAt(d, x, y) {
+  const g = d.grid;
+  const c = Math.round((x - g.col0) / g.step), r = Math.round((y - g.row0) / g.step);
+  if (c < 0 || r < 0 || c >= g.w || r >= g.h) return -1;
+  return r * g.w + c;
+}
+
+function stepNow() { return +$('step').value; }
+function history(d) { return d && d.histories ? d.histories[val('hist')] : null; }
+function stepFor(d) { const h = history(d); return h ? Math.min(stepNow(), h.stops.length) : 0; }
+
+// Where the line at (x, y) is heading: a target id, or -1 (stop).
+function destAt(d, x, y, onward) {
+  const k = cellAt(d, x, y);
+  if (k < 0) return -1;
+  const s = stepFor(d), h = history(d);
+  if (s > 0) return h.steps[s - 1][k];               // with history: the route's next pick from here
+  const inside = d.inside[k];
+  if (onward && inside >= 0) {
+    const s = d.targets[inside].successor;
+    return s == null ? inside : s;
+  }
+  return d.landing[k];
+}
+
+function draw() {
+  if (!state.cur) return;
+  const step = stepNow();
+  const onward = val('mode') === 'onward' && step === 0;
+  $('modeNote').textContent = step > 0
+    ? 'With stops taken, every line heads for the route\'s next pick from where it stands (onward applies at step 0 only).'
+    : onward
+    ? 'Inside a mass, lines head for its successor, so they run on to where the field drains.'
+    : 'Lines stop at the mass the route would take first from where they start.';
+  stepText(); stabText();
+  for (const v of views()) drawView(v, onward);
+}
+
+function drawView(v, onward) {
+  const d = verOf(v).d;
+  if (v.job) v.job.dispose();
+  const [w, h] = d.work_px;
+  const dSep = +$('sep').value;
+  const lines = v.lines = [];
+  const field = (p) => {
+    const t = destAt(d, p.x, p.y, onward);
+    if (t < 0) return null;
+    const a = d.px[t];
+    const dx = a.x - p.x, dy = a.y - p.y;
+    if (dx * dx + dy * dy < 4) return null;          // arrived
+    return { x: dx, y: dy };
+  };
+  // Fixed lattice of seeds: deterministic, and reaches every region.
+  const seeds = [];
+  const s = dSep * 3;
+  for (let y = s / 2; y < h; y += s) for (let x = s / 2; x < w; x += s) seeds.push({ x, y });
+  const job = v.job = computeStreamlines({
+    vectorField: field,
+    boundingBox: { left: 0, top: 0, width: w, height: h },
+    seed: seeds,
+    dSep, dTest: dSep * 0.45, timeStep: 0.6,
+    stepsPerIteration: 40, maxTimePerIteration: 14,
+    onStreamlineAdded(points) {
+      // Points run backward..forward along the field: the last point is where the line drains.
+      const end = points[points.length - 1];
+      const line = { pts: points.map(p => [p.x, p.y]), dest: destAt(d, end.x, end.y, onward) };
+      lines.push(line);
+      strokeLine(v.ctx, d, line);
+    },
+  });
+  paint(v);
+  v.drawing = true;
+  job.run().then(() => { if (v.job !== job) return; v.drawing = false; paint(v); readout(); });
+}
+
+function lineColour(d, line) {
+  if (val('ink') === 'black' || line.dest < 0) return '#1d1b18';
+  const b = d.targets[line.dest].basin;
+  return b == null ? '#1d1b18' : BASIN[b % BASIN.length];
+}
+
+function strokeLine(c, d, line) {
+  const pts = line.pts, n = pts.length;
+  c.strokeStyle = lineColour(d, line);
+  c.lineCap = 'round';
+  for (let i = 1; i < n; i++) {
+    const f = i / (n - 1);
+    c.lineWidth = (0.35 + 1.5 * f * f) * SCALE;
+    c.beginPath();
+    c.moveTo(pts[i - 1][0] * SCALE, pts[i - 1][1] * SCALE);
+    c.lineTo(pts[i][0] * SCALE, pts[i][1] * SCALE);
+    c.stroke();
+  }
+}
+
+function underlay(v) {
+  const u = val('under'), ctx = v.ctx;
+  ctx.fillStyle = '#fbf8f1'; ctx.fillRect(0, 0, v.cv.width, v.cv.height);
+  if (u === 'paper') return;
+  ctx.globalAlpha = u === 'notan' ? 0.42 : 0.38;
+  ctx.drawImage(verOf(v).imgs[u], 0, 0, v.cv.width, v.cv.height);
+  ctx.globalAlpha = 1;
+}
+
+function routeMarks(v) {
+  const d = verOf(v).d, h = history(d), s = stepFor(d), ctx = v.ctx;
+  if (!h || s === 0) return;
+  const stops = h.stops.slice(0, s);
+  ctx.strokeStyle = RED; ctx.lineWidth = 1.6 * SCALE; ctx.setLineDash([5 * SCALE, 4 * SCALE]);
+  ctx.beginPath();
+  stops.forEach((id, i) => { const a = d.px[id]; i ? ctx.lineTo(a.x * SCALE, a.y * SCALE) : ctx.moveTo(a.x * SCALE, a.y * SCALE); });
+  ctx.stroke(); ctx.setLineDash([]);
+  ctx.font = `bold ${12 * SCALE}px Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  stops.forEach((id, i) => {
+    const a = d.px[id];
+    ctx.beginPath(); ctx.arc(a.x * SCALE, a.y * SCALE, 8 * SCALE, 0, Math.PI * 2);
+    ctx.fillStyle = RED; ctx.fill();
+    ctx.fillStyle = '#fff'; ctx.fillText(String(i + 1), a.x * SCALE, a.y * SCALE + 0.5);
+  });
+}
+
+function stepText() {
+  const d = dA(), h = history(d);
+  if (!h) { $('stepNote').textContent = 'Re-run tools/export.py to add step fields.'; return; }
+  $('step').max = h.stops.length;
+  $('stepmax').textContent = `${h.stops.length} stops`;
+  const s = stepNow();
+  $('stepv').textContent = `step ${s}`;
+  const grid = s === 0 ? d.landing : h.steps[s - 1];
+  const n = grid.length;
+  const catchment = new Map();
+  for (const t of grid) if (t >= 0) catchment.set(t, (catchment.get(t) || 0) + 1);
+  const ends = grid.filter(t => t < 0).length / n;
+  // masses that have had catchment at any step up to this one
+  const ever = new Set();
+  for (let k = 0; k <= s; k++) for (const t of (k === 0 ? d.landing : h.steps[k - 1])) if (t >= 0) ever.add(t);
+  const next = s < h.stops.length ? `next stop: mass ${h.stops[s]}.` : 'the route has ended.';
+  $('stepNote').textContent = (s === 0
+    ? `No stops taken: the first-stop field. ${catchment.size} of ${d.targets.length} masses have catchment.`
+    : `${s} stop${s > 1 ? 's' : ''} taken; ${next} ${catchment.size} masses have catchment now, ` +
+      `${ever.size} of ${d.targets.length} so far. The route would end from ${(100 * ends).toFixed(0)}% of the frame.`) +
+    (comparing() && s > 0 ? ' B shows its own route at the same step.' : '');
+}
+
+function marks(v) {
+  if (!$('marks').checked) return;
+  const d = verOf(v).d, ctx = v.ctx;
+  const ends = new Set(d.basins.flatMap(b => b.end));
+  for (const t of d.targets) {
+    const a = d.px[t.id];
+    const r = (2.2 + 4 * Math.sqrt(t.strength)) * SCALE;
+    ctx.beginPath(); ctx.arc(a.x * SCALE, a.y * SCALE, r, 0, Math.PI * 2);
+    ctx.fillStyle = t.polarity === 'dark' ? '#1d1b18' : '#fbf8f1';
+    ctx.fill(); ctx.lineWidth = 1.2 * SCALE; ctx.strokeStyle = '#1d1b18'; ctx.stroke();
+    if (ends.has(t.id)) {
+      ctx.beginPath(); ctx.arc(a.x * SCALE, a.y * SCALE, r + 4 * SCALE, 0, Math.PI * 2);
+      ctx.strokeStyle = t.basin != null ? BASIN[t.basin % BASIN.length] : '#1d1b18';
+      ctx.lineWidth = 2 * SCALE; ctx.stroke();
+    }
+  }
+}
+
+function selMark(v) {
+  if (v !== V.a || state.sel == null) return;
+  const a = dA().px[state.sel], ctx = v.ctx;
+  if (!a) return;
+  ctx.setLineDash([4 * SCALE, 3 * SCALE]); ctx.strokeStyle = RED; ctx.lineWidth = 2 * SCALE;
+  ctx.beginPath(); ctx.arc(a.x * SCALE, a.y * SCALE, 15 * SCALE, 0, Math.PI * 2); ctx.stroke();
+  ctx.setLineDash([]);
+}
+
+function paint(v) {
+  if (!verOf(v)?.d) return;
+  underlay(v);
+  for (const l of v.lines) strokeLine(v.ctx, verOf(v).d, l);
+  marks(v);
+  divideMarks(v);
+  compareMarks(v);
+  selMark(v);
+  routeMarks(v);
+}
+function paintAll() { for (const v of views()) paint(v); }
+
+function pieceLine(ctx, g, p) {
+  const S = SCALE;
+  ctx.beginPath();
+  if (p.v) { const x = g.col0 + (p.c + 0.5) * g.step, y = g.row0 + p.r * g.step;
+             ctx.moveTo(x * S, (y - g.step / 2) * S); ctx.lineTo(x * S, (y + g.step / 2) * S); }
+  else { const x = g.col0 + p.c * g.step, y = g.row0 + (p.r + 0.5) * g.step;
+         ctx.moveTo((x - g.step / 2) * S, y * S); ctx.lineTo((x + g.step / 2) * S, y * S); }
+  ctx.stroke();
+}
+
+// ---- divides: which pieces survive small changes ----
+function divideMarks(v) {
+  const st = state.stab[keyOf(v)], d = verOf(v).d, ctx = v.ctx;
+  if (!st || !$('stabShow').checked || stepNow() > 0) return;
+  const g = d.grid, n = st.changes.length, S = SCALE, t = val('tol');
+  for (const p of st.pieces) {
+    const k = p.kept[t].length;
+    ctx.setLineDash(k === n ? [] : k >= n - 2 ? [5 * S, 3 * S] : [1 * S, 3 * S]);
+    ctx.lineWidth = (k === n ? 3 : k >= n - 2 ? 1.6 : 1.2) * S;
+    ctx.strokeStyle = k === n ? '#1d1b18' : 'rgba(29,27,24,0.75)';
+    ctx.lineCap = k === n ? 'square' : 'butt';
+    pieceLine(ctx, g, p);
+  }
+  ctx.setLineDash([]); ctx.lineCap = 'round';
+}
+
+function stabText() {
+  const st = state.stab[state.cur];
+  $('stabKey').hidden = !st;
+  if (!st) { $('stabOut').textContent = ''; if (!state.stabBusy) $('stabStatus').textContent = ''; return; }
+  const t = val('tol'), bt = st.by_tol[t];
+  const lines = [`${st.n_pieces} pieces of divide; kept by all ${st.changes.length} within ${t}: ${pct(bt.held_by_all / st.n_pieces)}`,
+                 `between basins: ${bt.between_basins_held_by_all} of ${bt.between_basins} kept by all`];
+  for (const c of st.changes) {
+    const b = st.basins_held[c];
+    lines.push(`${c.padEnd(11)} divide kept ${pct(bt.per_change[c]).padStart(4)}  basins ${b.held}/${b.of}${b.extra ? ` (+${b.extra})` : ''}  masses ${st.n_targets[c]}`);
+  }
+  lines.push(`as is: ${st.n_targets['as is']} masses; ${st.seconds} s`);
+  $('stabOut').textContent = lines.join('\n');
+  if (!state.stabBusy) $('stabStatus').textContent = stepNow() > 0 ? 'Divides are drawn at step 0.' : '';
+}
+
+// ---- workers, pixels and mass maps ----
+function runWorker(msg, transfer, onStage) {
+  return new Promise((ok, no) => {
+    const w = new Worker('js/worker.js', { type: 'module' });
+    const t0 = performance.now();
+    w.onmessage = (e) => {
+      const m = e.data;
+      if (m.stage) { onStage(m.stage, ((performance.now() - t0) / 1000).toFixed(0)); return; }
+      w.terminate();
+      if (m.error) { console.error(m.error); no(new Error(m.error.split('\n')[0])); } else ok(m);
+    };
+    w.onerror = (e) => { w.terminate(); no(new Error(e.message)); };
+    w.postMessage(msg, transfer);
+  });
+}
+
+async function ensurePixels(v) {
+  if (v.pix) return v.pix;
+  const blob = await (await fetch(`paintings/${v.painting}.jpg`)).blob();
+  const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none', imageOrientation: 'from-image' });
+  const c = new OffscreenCanvas(bmp.width, bmp.height).getContext('2d', { willReadFrequently: true });
+  c.drawImage(bmp, 0, 0);
+  return (v.pix = { pixels: c.getImageData(0, 0, bmp.width, bmp.height).data, W: bmp.width, H: bmp.height });
+}
+
+// The mass map the edits work on. The baked paintings come from the Python, so the port reads them
+// once here; its first-stop field must equal the baked one.
+async function ensureLabels(v, onStage) {
+  if (v.labels) return;
+  const { pixels, W, H } = await ensurePixels(v);
+  const m = await runWorker({ pixels: pixels.slice(), W, H }, [], onStage);
+  v.labels = m.labels; v.lw = m.w; v.lh = m.h;
+  v.labelCheck = JSON.stringify(m.data.landing) === JSON.stringify(v.d.landing);
+}
+
+function makeImgs(notanU8, w, h, src) {
+  const notan = document.createElement('canvas'); notan.width = w; notan.height = h;
+  const id = new ImageData(w, h);
+  for (let i = 0; i < w * h; i++) { id.data[4 * i] = id.data[4 * i + 1] = id.data[4 * i + 2] = notanU8[i]; id.data[4 * i + 3] = 255; }
+  notan.getContext('2d').putImageData(id, 0, 0);
+  const image = document.createElement('canvas'); image.width = w; image.height = h;
+  const ic = image.getContext('2d'); ic.imageSmoothingQuality = 'high'; ic.drawImage(src, 0, 0, w, h);
+  return { notan, image };
+}
+function canvasOf(pixels, W, H) {
+  const c = new OffscreenCanvas(W, H);
+  c.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(pixels), W, H), 0, 0);
+  return c;
+}
+
+$('stabShow').addEventListener('change', () => paintAll());
+$('tol').addEventListener('change', () => { stabText(); paintAll(); });
+$('stabGo').onclick = async () => {
+  const key = state.cur, v = versions.get(key);
+  if (state.stabBusy) return;
+  state.stabBusy = true; $('stabGo').disabled = true;
+  try {
+    const { pixels, W, H } = await ensurePixels(v);
+    const m = await runWorker({ stability: true, pixels: pixels.slice(), W, H }, [],
+                              (s, t) => { $('stabStatus').textContent = `${s}... (${t} s)`; });
+    state.stab[key] = m.stability;
+    state.stabBusy = false;
+    if (state.cur === key) { stabText(); if (stepNow() === 0) paintAll(); else $('stabStatus').textContent = 'Done. Divides are drawn at step 0.'; }
+    else if (state.cmp === key) paintAll();
+  } catch (err) {
+    state.stabBusy = false; $('stabStatus').textContent = 'The test failed: ' + err.message;
+  }
+  $('stabGo').disabled = false;
+};
+
+// ---- what if ----
+function canvasXY(v, e) {
+  const d = verOf(v).d, b = v.cv.getBoundingClientRect();
+  return [(e.clientX - b.left) / b.width * d.work_px[0], (e.clientY - b.top) / b.height * d.work_px[1]];
+}
+V.a.cv.addEventListener('click', (e) => {
+  const d = dA(); if (!d) return;
+  const [x, y] = canvasXY(V.a, e);
+  const k = cellAt(d, x, y);
+  let m = k >= 0 ? d.inside[k] : -1;
+  if (m < 0) {                                       // on flat ground: the nearest mass marker
+    let best = Infinity;
+    d.px.forEach((a, i) => { const q = (a.x - x) ** 2 + (a.y - y) ** 2; if (q < best) { best = q; m = i; } });
+  }
+  state.sel = m >= 0 ? m : null;
+  whatifText(); paint(V.a);
+});
+for (const id of ['wiOp']) $(id).addEventListener('change', () => whatifText());
+$('wiAmt').addEventListener('input', () => { $('wiAmtv').textContent = $('wiAmt').value + '%'; });
+
+function whatifText() {
+  const d = dA();
+  $('wiAmtRow').style.opacity = val('wiOp') === 'paint out' ? 0.35 : 1;
+  $('wiAmt').disabled = val('wiOp') === 'paint out';
+  $('wiGo').disabled = state.sel == null || !!state.wiBusy;
+  if (state.sel == null || !d) { $('wiSel').textContent = 'No mass chosen.'; return; }
+  const t = d.targets[state.sel];
+  const c = d.landing.filter((x) => x === state.sel).length / d.landing.length;
+  $('wiSel').textContent = `Mass ${t.id}: ${t.polarity}, strength ${t.strength.toFixed(2)}, ` +
+    `first stop from ${pct(c)} of the frame, basin ${t.basin + 1}.`;
+}
+
+$('wiGo').onclick = async () => {
+  const key = state.cur, v = versions.get(key), mass = state.sel;
+  const op = val('wiOp'), amount = +$('wiAmt').value / 100;
+  if (mass == null || state.wiBusy) return;
+  state.wiBusy = true; whatifText();
+  const say = (s) => { $('wiStatus').textContent = s; };
+  try {
+    if (!v.labels) await ensureLabels(v, (s, t) => say(`Reading the picture's masses first: ${s}... (${t} s)`));
+    if (v.labelCheck === false) say('Note: the port\'s first-stop field differs from the baked one for this picture.');
+    const { pixels, W, H } = v.pix;
+    const m = await runWorker({ edit: { mass, op, amount, labels: v.labels, w: v.lw, h: v.lh }, pixels: pixels.slice(), W, H }, [],
+                              (s, t) => say(`${s}... (${t} s)`));
+    const d = m.data, [w, h] = d.work_px;
+    if (d.abstain) { say('After that change the reader finds no masses: it abstains.'); return; }
+    const what = `mass ${mass} ${op}${op === 'paint out' ? '' : ' ' + Math.round(amount * 100) + '%'}`;
+    d.source = `${(v.d.source || v.label).replace(/\.[^.]+$/, '')}_${what.replace(/[ %]+/g, '-')}`;
+    const nv = { key: `e${++state.nEdit}`, label: `${v.label}, ${what}`, button: `${v.button || v.label}, ${what}`,
+                 parent: key, d, imgs: makeImgs(m.notan, w, h, canvasOf(m.pixels, W, H)),
+                 pix: { pixels: m.pixels, W, H }, labels: m.labels, lw: m.w, lh: m.h, edit: m.edit };
+    addVersion(nv);
+    say(`${what}: ${nOf(d.targets.length, 'mass', 'masses')}, ${nOf(d.basins.length, 'basin')}, read in ${d.receipt.seconds} s. Shown as B.`);
+    state.cmp = nv.key;
+    show();
+  } catch (err) {
+    say('The change failed: ' + err.message);
+  } finally {
+    state.wiBusy = false; whatifText();
+  }
+};
+
+// ---- compare ----
+function cmpOptions() {
+  const sel = $('cmpSel'), keep = state.cmp;
+  sel.innerHTML = '';
+  const none = new Option('nothing', ''); sel.add(none);
+  for (const v of versions.values()) if (v.key !== state.cur) sel.add(new Option(v.label, v.key));
+  sel.value = keep && versions.has(keep) && keep !== state.cur ? keep : '';
+}
+$('cmpSel').addEventListener('change', async () => {
+  const key = $('cmpSel').value || null;
+  if (key) await ensureData(versions.get(key));
+  state.cmp = key;
+  show();
+});
+$('cmpShow').addEventListener('change', () => paintAll());
+
+function cmpResult() {
+  if (!comparing()) return null;
+  const k = `${state.cur}|${state.cmp}`;
+  if (!state.cmpCache.has(k)) state.cmpCache.set(k, compare(dA(), versions.get(state.cmp).d));
+  return state.cmpCache.get(k);
+}
+
+function compareMarks(v) {
+  const c = cmpResult();
+  if (!c || !$('cmpShow').checked || stepNow() > 0) return;
+  const d = verOf(v).d, g = d.grid, ctx = v.ctx, S = SCALE;
+  if (v === V.b) {
+    ctx.fillStyle = 'rgba(179,38,30,0.22)';
+    for (let k = 0; k < c.changed_b.length; k++) {
+      if (!c.changed_b[k]) continue;
+      const col = k % g.w, row = (k / g.w) | 0;
+      ctx.fillRect((g.col0 + col * g.step - g.step / 2) * S, (g.row0 + row * g.step - g.step / 2) * S, g.step * S, g.step * S);
+    }
+    ctx.strokeStyle = RED; ctx.lineWidth = 2.4 * S; ctx.lineCap = 'square';
+    for (const p of c.divides.new_b) pieceLine(ctx, g, p);
+  } else {
+    ctx.strokeStyle = RED; ctx.lineWidth = 1.8 * S; ctx.lineCap = 'butt'; ctx.setLineDash([4 * S, 3 * S]);
+    for (const p of c.divides.lost_a) pieceLine(ctx, g, p);
+    ctx.setLineDash([]);
+  }
+  ctx.lineCap = 'round';
+}
+
+function compareText() {
+  const c = cmpResult(), out = $('cmpOut');
+  out.hidden = !c;
+  if (!c) { out.innerHTML = ''; return; }
+  const A = dA(), B = versions.get(state.cmp).d;
+  const ends = (d, e) => e.map((i) => `mass ${i}`).join(' and ');
+  const li = [];
+  li.push(`<p><strong>First stop changed for ${pct(c.first_stop_changed)} of the frame</strong> (tinted on B).</p>`);
+  li.push(`<p>Masses: ${c.n_a} in A, ${c.n_b} in B; ${c.matched} match (same polarity, within ${c.tol_mass} of the frame).</p>`);
+  // where the picture comes to rest
+  const bs = c.basins.map((b) => b.b != null
+    ? `A's basin ${b.a + 1} (ends at ${ends(A, b.ends_a)}, ${pct(b.share[0])} of mass) still ends there: B's basin ${b.b + 1}, ${pct(b.share[1])} of mass.`
+    : `A's basin ${b.a + 1} (ends at ${ends(A, b.ends_a)}) no longer ends there in B.`);
+  for (const b of c.new_basins) bs.push(`B has a basin ending somewhere new: B's ${ends(B, b.ends_b)}, ${pct(b.share)} of mass.`);
+  li.push(`<p><strong>Where it comes to rest</strong></p><ul>${bs.map((s) => `<li>${s}</li>`).join('')}</ul>`);
+  // masses that changed
+  // small masses (strength under 0.1, first stop from under 1%) that appear or go are counted, not listed
+  const small = (s, k) => s < 0.1 && k < 0.01;
+  const goneSmall = c.masses.filter((m) => m.b == null && small(m.strength[0], m.catchment[0])).length;
+  const newSmall = c.added.filter((a) => small(a.strength, a.catchment)).length;
+  const ms = c.masses
+    .filter((m) => m.b == null ? !small(m.strength[0], m.catchment[0])
+      : Math.abs(m.catchment[1] - m.catchment[0]) >= 0.02 || Math.abs(m.strength[1] - m.strength[0]) >= 0.05)
+    .sort((p, q) => Math.abs(q.catchment[1] - q.catchment[0]) - Math.abs(p.catchment[1] - p.catchment[0]))
+    .map((m) => m.b == null
+      ? `A's mass ${m.a} (${m.polarity}, strength ${m.strength[0].toFixed(2)}, first stop from ${pct(m.catchment[0])}) is gone in B.`
+      : `mass ${m.a} (${m.polarity}): strength ${m.strength[0].toFixed(2)} → ${m.strength[1].toFixed(2)}, first stop from ${pct(m.catchment[0])} → ${pct(m.catchment[1])}${m.b !== m.a ? ` (B's mass ${m.b})` : ''}.`);
+  for (const a of c.added.filter((a) => !small(a.strength, a.catchment))) ms.push(`new in B: a ${a.polarity} mass, strength ${a.strength.toFixed(2)}, first stop from ${pct(a.catchment)} (B's mass ${a.b}).`);
+  if (goneSmall || newSmall) ms.push(`small masses (strength under 0.1, first stop from under 1% of the frame): ${goneSmall} gone, ${newSmall} new.`);
+  li.push(`<p><strong>Masses that changed</strong> (catchment by 2 points or more, strength by 0.05 or more)</p>` +
+          (ms.length ? `<ul>${ms.map((s) => `<li>${s}</li>`).join('')}</ul>` : '<p>none</p>'));
+  li.push(`<p><strong>Divides</strong>: ${c.divides.kept_a} of A's ${c.divides.a} pieces have a divide in B within ${c.tol_div}` +
+          (c.divides.lost_a.length ? ' (the rest dashed red on A)' : '') + `; B has ${c.divides.new_b.length} pieces with no divide in A that close` + (c.divides.new_b.length ? ' (red on B).' : '.') + '</p>');
+  const rb = c.route.b_as_a.map((x, i) => (x == null ? `new (B's ${c.route.b[i]})` : x));
+  li.push(`<p><strong>Centre route</strong>: A ${c.route.a.join(', ')}; B ${rb.join(', ')} (in A's numbers). ` +
+          (c.route.agree === c.route.a.length && c.route.a.length === c.route.b.length ? 'The same route.'
+            : c.route.agree === 0 ? 'They differ from the first stop.'
+            : `The first ${c.route.agree} stop${c.route.agree === 1 ? '' : 's'} agree.`) + '</p>');
+  out.innerHTML = `<h3>What moved, A to B</h3>` + li.join('');
+}
+
+function readout() {
+  const d = dA();
+  $('legend').innerHTML = d.basins.map((b, i) =>
+    `<div><span style="background:${BASIN[i % BASIN.length]}"></span>basin ${i + 1}: ${b.n_members} masses,
+     ${(100 * b.mass_share).toFixed(0)}% of mass, ends in ${b.kind === 'cycle' ? 'a pair' : 'a dead end'}</div>`).join('');
+  const r = d.receipt || {};
+  const v = versions.get(state.cur);
+  $('receipt').textContent =
+    `${nOf(d.targets.length, 'mass', 'masses')}, ${nOf(d.basins.length, 'basin')}\n` +
+    `entry stability ${d.entry_stability}\n` +
+    `grid ${d.grid.w}×${d.grid.h} cells, step ${d.grid.step}px\n` +
+    (r.computed ? `computed ${r.computed}, ${r.seconds} s\n`
+                : `checked vs route(): ${r.agree}/${r.checked_against_route} agree\n`) +
+    (v.edit ? `edit: mass ${v.edit.mass} ${v.edit.op}${v.edit.op === 'paint out' ? '' : ' ' + Math.round(v.edit.amount * 100) + '%'}, ${pct(v.edit.area_share)} of the frame\n` : '') +
+    (v.labelCheck != null ? `port's first-stop field equals the baked one: ${v.labelCheck ? 'yes' : 'NO'}\n` : '') +
+    (d.histories ? Object.entries(d.histories).map(([k, h]) =>
+      `${k} route: ${h.stops.length} stops, next-stop check ${h.next_stop_check}`).join('\n') + '\n' : '') +
+    `lines drawn: ${V.a.lines.length}`;
+}
+
+for (const v of [V.a, V.b]) v.cv.addEventListener('mousemove', (e) => {
+  const ver = verOf(v); if (!ver?.d) return;
+  const d = ver.d, c = v === V.b ? cmpResult() : null;
+  const tag = (i) => (c && c.masses.find((m) => m.b === i) ? ` (A's mass ${c.masses.find((m) => m.b === i).a})` : c ? ' (only in B)' : '');
+  const [x, y] = canvasXY(v, e);
+  const k = cellAt(d, x, y); if (k < 0) return;
+  const lead = comparing() ? (v === V.a ? 'A: ' : 'B: ') : '';
+  const st = stepFor(d), hist = history(d);
+  if (st > 0) {
+    const nx = hist.steps[st - 1][k];
+    $('hover').textContent = lead + (nx < 0
+      ? `With stops ${hist.stops.slice(0, st).join(', ')} taken, a route standing here would end: nothing left scores above the floor.`
+      : `With stops ${hist.stops.slice(0, st).join(', ')} taken, from here the route goes next to mass ${nx}${tag(nx)} (${d.targets[nx].polarity}, strength ${d.targets[nx].strength.toFixed(2)}).`);
+    return;
+  }
+  const land = d.landing[k], ins = d.inside[k];
+  const t = d.targets[land];
+  let s = `From here the route goes first to mass ${land}${tag(land)} (${t.polarity}, strength ${t.strength.toFixed(2)}), basin ${t.basin + 1}.`;
+  if (ins >= 0) {
+    const m = d.targets[ins];
+    s += ` You are inside mass ${ins}${tag(ins)}; its successor is ${m.successor == null ? 'none (a dead end)' : 'mass ' + m.successor}.`;
+  } else s += ' You are on flat ground.';
+  $('hover').textContent = lead + s;
+});
+
+const fileBase = (v) => (v.d.source || v.label).replace(/\.[^.]+$/, '');
+$('png').onclick = () => {
+  const a = document.createElement('a');
+  let c = V.a.cv, name = fileBase(versions.get(state.cur));
+  if (comparing()) {           // A and B side by side
+    const gap = 24 * SCALE;
+    c = document.createElement('canvas');
+    c.width = V.a.cv.width + gap + V.b.cv.width; c.height = Math.max(V.a.cv.height, V.b.cv.height);
+    const x = c.getContext('2d'); x.fillStyle = '#f3eee3'; x.fillRect(0, 0, c.width, c.height);
+    x.drawImage(V.a.cv, 0, 0); x.drawImage(V.b.cv, V.a.cv.width + gap, 0);
+    name += '_vs_' + fileBase(versions.get(state.cmp));
+  }
+  a.download = `${name}_drainage.png`; a.href = c.toDataURL('image/png'); a.click();
+};
+$('svg').onclick = () => {
+  const d = dA(); const [w, h] = d.work_px;
+  const parts = [`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w}" height="${h}">`];
+  for (const l of V.a.lines) {
+    const pts = l.pts.map(p => p[0].toFixed(2) + ',' + p[1].toFixed(2)).join(' ');
+    parts.push(`<polyline fill="none" stroke="${lineColour(d, l)}" stroke-width="0.8" stroke-linecap="round" points="${pts}"/>`);
+  }
+  parts.push('</svg>');
+  const a = document.createElement('a');
+  a.download = `${fileBase(versions.get(state.cur))}_drainage.svg`;
+  a.href = URL.createObjectURL(new Blob([parts.join('\n')], { type: 'image/svg+xml' }));
+  a.click();
+};
+
+// ---- your own picture: decoded here, read by the JS port in a worker ----
+async function readOwn(file) {
+  if (!file || !file.type.startsWith('image/')) { $('status').textContent = 'That is not an image file.'; return; }
+  $('status').textContent = `Reading ${file.name}...`;
+  let bmp;
+  try {
+    bmp = await createImageBitmap(file, { colorSpaceConversion: 'none', imageOrientation: 'from-image' });
+  } catch { $('status').textContent = 'This browser could not decode that image.'; return; }
+  const W = bmp.width, H = bmp.height;
+  if (W * H > 40e6) { $('status').textContent = `${W}×${H} is too large to read here (over 40 megapixels).`; return; }
+  const full = new OffscreenCanvas(W, H), fc = full.getContext('2d', { willReadFrequently: true });
+  fc.drawImage(bmp, 0, 0);
+  const pixels = fc.getImageData(0, 0, W, H).data;
+  const keep = pixels.slice();
+  try {
+    const m = await runWorker({ pixels, W, H }, [pixels.buffer],
+                              (s, t) => { $('status').textContent = `${file.name}: ${s}... (${t} s)`; });
+    const d = m.data, [w, h] = d.work_px;
+    if (d.abstain) { $('status').textContent = `${file.name}: no masses to read (flat, or texture that vanishes in the squint). The reader abstains.`; return; }
+    d.source = file.name;
+    $('status').textContent = `${file.name}: ${nOf(d.targets.length, 'mass', 'masses')}, ${nOf(d.basins.length, 'basin')}, read in ${d.receipt.seconds} s.`;
+    const v = { key: `own${++state.nOwn}`, label: file.name,
+                button: file.name.length > 18 ? file.name.slice(0, 16) + '…' : file.name,
+                d, imgs: makeImgs(m.notan, w, h, bmp), pix: { pixels: keep, W, H }, labels: m.labels, lw: m.w, lh: m.h };
+    addVersion(v);
+    state.cur = v.key; state.sel = null;
+    show();
+  } catch (err) {
+    $('status').textContent = 'The reader failed: ' + err.message;
+  }
+}
+$('file').addEventListener('change', (e) => readOwn(e.target.files[0]));
+for (const el of [$('drop'), document.querySelector('.stage')]) {
+  el.addEventListener('dragover', (e) => { e.preventDefault(); el.classList.add('over'); });
+  el.addEventListener('dragleave', () => el.classList.remove('over'));
+  el.addEventListener('drop', (e) => { e.preventDefault(); el.classList.remove('over'); readOwn(e.dataTransfer.files[0]); });
+}
+
+open(names.includes(store.get('pic')) ? store.get('pic') : names[0]);
+</script>
+</body>
+</html>

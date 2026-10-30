@@ -9,3 +9,6 @@ Full text: https://creativecommons.org/licenses/by/4.0/legalcode
 
 The paintings in docs/paintings/ are public-domain works; their museum sources are
 listed in README.md. Source code is licensed separately under the MIT License (see LICENSE).
+
+docs/vendor/streamlines/ is anvaka/streamlines by Andrei Kashcha, MIT License, unchanged;
+its own LICENSE file is kept beside it.

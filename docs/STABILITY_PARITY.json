@@ -1,0 +1,354 @@
+{
+ "caravaggio": {
+  "parity": {
+   "crop 2%": {
+    "targets": [
+     22,
+     22
+    ],
+    "landing": "15360/15360",
+    "basin_ends_equal": true
+   },
+   "JPEG 60": {
+    "targets": [
+     23,
+     23
+    ],
+    "landing": "15488/15488",
+    "basin_ends_equal": true
+   },
+   "gamma 0.8": {
+    "targets": [
+     24,
+     24
+    ],
+    "landing": "15488/15488",
+    "basin_ends_equal": true
+   },
+   "gamma 1.25": {
+    "targets": [
+     18,
+     18
+    ],
+    "landing": "15488/15488",
+    "basin_ends_equal": true
+   },
+   "half size": {
+    "targets": [
+     23,
+     23
+    ],
+    "landing": "15488/15488",
+    "basin_ends_equal": true
+   }
+  },
+  "basins_held": {
+   "crop 2%": "1/2",
+   "JPEG 60": "2/2",
+   "gamma 0.8": "1/2",
+   "gamma 1.25": "0/2 (+1)",
+   "half size": "1/2"
+  },
+  "divide_pieces": 641,
+  "by_tol": {
+   "0.01": {
+    "held_by_all": 0.044,
+    "between_basins": "0/100",
+    "per_change": {
+     "crop 2%": 0.52,
+     "JPEG 60": 0.736,
+     "gamma 0.8": 0.324,
+     "gamma 1.25": 0.285,
+     "half size": 0.797
+    }
+   },
+   "0.02": {
+    "held_by_all": 0.426,
+    "between_basins": "0/100",
+    "per_change": {
+     "crop 2%": 0.822,
+     "JPEG 60": 0.93,
+     "gamma 0.8": 0.549,
+     "gamma 1.25": 0.657,
+     "half size": 0.984
+    }
+   },
+   "0.05": {
+    "held_by_all": 0.686,
+    "between_basins": "1/100",
+    "per_change": {
+     "crop 2%": 0.934,
+     "JPEG 60": 1,
+     "gamma 0.8": 0.705,
+     "gamma 1.25": 0.83,
+     "half size": 1
+    }
+   }
+  },
+  "seconds": 32.902
+ },
+ "gauguin": {
+  "parity": {
+   "crop 2%": {
+    "targets": [
+     20,
+     20
+    ],
+    "landing": "12928/12928",
+    "basin_ends_equal": true
+   },
+   "JPEG 60": {
+    "targets": [
+     21,
+     21
+    ],
+    "landing": "13056/13056",
+    "basin_ends_equal": true
+   },
+   "gamma 0.8": {
+    "targets": [
+     24,
+     24
+    ],
+    "landing": "13056/13056",
+    "basin_ends_equal": true
+   },
+   "gamma 1.25": {
+    "targets": [
+     21,
+     21
+    ],
+    "landing": "13056/13056",
+    "basin_ends_equal": true
+   },
+   "half size": {
+    "targets": [
+     22,
+     22
+    ],
+    "landing": "13056/13056",
+    "basin_ends_equal": true
+   }
+  },
+  "basins_held": {
+   "crop 2%": "2/2",
+   "JPEG 60": "2/2",
+   "gamma 0.8": "2/2",
+   "gamma 1.25": "2/2",
+   "half size": "2/2"
+  },
+  "divide_pieces": 536,
+  "by_tol": {
+   "0.01": {
+    "held_by_all": 0.466,
+    "between_basins": "84/158",
+    "per_change": {
+     "crop 2%": 0.703,
+     "JPEG 60": 1,
+     "gamma 0.8": 0.703,
+     "gamma 1.25": 0.726,
+     "half size": 0.993
+    }
+   },
+   "0.02": {
+    "held_by_all": 0.89,
+    "between_basins": "156/158",
+    "per_change": {
+     "crop 2%": 0.963,
+     "JPEG 60": 1,
+     "gamma 0.8": 0.965,
+     "gamma 1.25": 0.951,
+     "half size": 1
+    }
+   },
+   "0.05": {
+    "held_by_all": 0.998,
+    "between_basins": "158/158",
+    "per_change": {
+     "crop 2%": 0.998,
+     "JPEG 60": 1,
+     "gamma 0.8": 1,
+     "gamma 1.25": 1,
+     "half size": 1
+    }
+   }
+  },
+  "seconds": 29.078
+ },
+ "bruegel": {
+  "parity": {
+   "crop 2%": {
+    "targets": [
+     13,
+     13
+    ],
+    "landing": "10496/10496",
+    "basin_ends_equal": true
+   },
+   "JPEG 60": {
+    "targets": [
+     13,
+     13
+    ],
+    "landing": "10624/10624",
+    "basin_ends_equal": true
+   },
+   "gamma 0.8": {
+    "targets": [
+     12,
+     12
+    ],
+    "landing": "10624/10624",
+    "basin_ends_equal": true
+   },
+   "gamma 1.25": {
+    "targets": [
+     14,
+     14
+    ],
+    "landing": "10624/10624",
+    "basin_ends_equal": true
+   },
+   "half size": {
+    "targets": [
+     13,
+     13
+    ],
+    "landing": "10624/10624",
+    "basin_ends_equal": true
+   }
+  },
+  "basins_held": {
+   "crop 2%": "3/3",
+   "JPEG 60": "3/3",
+   "gamma 0.8": "3/3",
+   "gamma 1.25": "3/3",
+   "half size": "3/3"
+  },
+  "divide_pieces": 326,
+  "by_tol": {
+   "0.01": {
+    "held_by_all": 0.132,
+    "between_basins": "43/235",
+    "per_change": {
+     "crop 2%": 0.641,
+     "JPEG 60": 1,
+     "gamma 0.8": 0.322,
+     "gamma 1.25": 0.567,
+     "half size": 1
+    }
+   },
+   "0.02": {
+    "held_by_all": 0.472,
+    "between_basins": "151/235",
+    "per_change": {
+     "crop 2%": 0.96,
+     "JPEG 60": 1,
+     "gamma 0.8": 0.497,
+     "gamma 1.25": 0.902,
+     "half size": 1
+    }
+   },
+   "0.05": {
+    "held_by_all": 0.709,
+    "between_basins": "223/235",
+    "per_change": {
+     "crop 2%": 1,
+     "JPEG 60": 1,
+     "gamma 0.8": 0.709,
+     "gamma 1.25": 1,
+     "half size": 1
+    }
+   }
+  },
+  "seconds": 14.062
+ },
+ "jeong": {
+  "parity": {
+   "crop 2%": {
+    "targets": [
+     22,
+     22
+    ],
+    "landing": "9344/9344",
+    "basin_ends_equal": true
+   },
+   "JPEG 60": {
+    "targets": [
+     22,
+     22
+    ],
+    "landing": "9472/9472",
+    "basin_ends_equal": true
+   },
+   "gamma 0.8": {
+    "targets": [
+     22,
+     22
+    ],
+    "landing": "9472/9472",
+    "basin_ends_equal": true
+   },
+   "gamma 1.25": {
+    "targets": [
+     21,
+     21
+    ],
+    "landing": "9472/9472",
+    "basin_ends_equal": true
+   },
+   "half size": {
+    "targets": [
+     22,
+     22
+    ],
+    "landing": "9472/9472",
+    "basin_ends_equal": true
+   }
+  },
+  "basins_held": {
+   "crop 2%": "1/2 (+1)",
+   "JPEG 60": "2/2",
+   "gamma 0.8": "1/2 (+1)",
+   "gamma 1.25": "1/2 (+1)",
+   "half size": "2/2"
+  },
+  "divide_pieces": 393,
+  "by_tol": {
+   "0.01": {
+    "held_by_all": 0.092,
+    "between_basins": "0/121",
+    "per_change": {
+     "crop 2%": 0.585,
+     "JPEG 60": 0.206,
+     "gamma 0.8": 0.198,
+     "gamma 1.25": 0.211,
+     "half size": 1
+    }
+   },
+   "0.02": {
+    "held_by_all": 0.206,
+    "between_basins": "0/121",
+    "per_change": {
+     "crop 2%": 0.84,
+     "JPEG 60": 0.545,
+     "gamma 0.8": 0.422,
+     "gamma 1.25": 0.481,
+     "half size": 1
+    }
+   },
+   "0.05": {
+    "held_by_all": 0.776,
+    "between_basins": "94/121",
+    "per_change": {
+     "crop 2%": 1,
+     "JPEG 60": 0.88,
+     "gamma 0.8": 0.901,
+     "gamma 1.25": 0.891,
+     "half size": 1
+    }
+   }
+  },
+  "seconds": 18.681
+ }
+}

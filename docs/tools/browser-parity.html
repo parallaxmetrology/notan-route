@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Browser parity</title>
+<body style="font: 13px/1.5 ui-monospace, Menlo, monospace; padding: 16px">
+<p>The four paintings decoded by this browser (not by Pillow), read by the JS port, compared with the Python field in data/.</p>
+<pre id="out">running...</pre>
+<script type="module">
+import * as nr from '../js/notan-route.js';
+const out = document.getElementById('out');
+const names = await (await fetch('../data/index.json')).json();
+const lines = [`browser: ${navigator.userAgent}`];
+const agree = (a, b) => { let s = 0; for (let i = 0; i < a.length; i++) s += a[i] === b[i]; return `${s}/${a.length}`; };
+for (const n of names) {
+  const py = await (await fetch(`../data/${n}.json`)).json();
+  const blob = await (await fetch(`../paintings/${n}.jpg`)).blob();
+  const bmp = await createImageBitmap(blob, { colorSpaceConversion: 'none', imageOrientation: 'from-image' });
+  const c = new OffscreenCanvas(bmp.width, bmp.height).getContext('2d');
+  c.drawImage(bmp, 0, 0);
+  const px = c.getImageData(0, 0, bmp.width, bmp.height).data;
+  const t0 = performance.now();
+  const js = nr.drainage(nr.read(px, bmp.width, bmp.height, 4));
+  const tg = (d) => JSON.stringify(d.targets.map((t) => [t.id, t.polarity, t.strength, t.successor, t.basin, t.x, t.y]));
+  const steps = Object.keys(py.histories).map((k) => `${k}: stops ${JSON.stringify(py.histories[k].stops) === JSON.stringify(js.histories[k].stops) ? 'same' : 'DIFFER'}, cells ` +
+    py.histories[k].steps.map((g, i) => js.histories[k].steps[i] ? agree(g, js.histories[k].steps[i]) : 'missing').join(' '));
+  lines.push(`${n}: targets ${py.targets.length}/${js.targets.length} ${tg(py) === tg(js) ? 'identical' : 'DIFFER'}; basins ${JSON.stringify(py.basins) === JSON.stringify(js.basins) ? 'identical' : 'DIFFER'}; ` +
+    `entry ${py.entry_stability}/${js.entry_stability}; landing ${agree(py.landing, js.landing)}; inside ${agree(py.inside, js.inside)}; ` +
+    `${((performance.now() - t0) / 1000).toFixed(1)} s\n   ${steps.join('\n   ')}`);
+  out.textContent = lines.join('\n');
+}
+lines.push('done'); out.textContent = lines.join('\n');
+</script>
